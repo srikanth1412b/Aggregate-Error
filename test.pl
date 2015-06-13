@@ -1,7 +1,12 @@
+
+############This Program is to create an Filer Object
+and by using that object create an Aggregate by manuall entering the Aggreate name#####
+
 use NetApp::Filer;
 use NetApp::Aggregate;
 use strict;
 use warnings;
+no warnings "all";
 use English;
 use Carp;
 our $VERSION = '500.002';
@@ -9,37 +14,35 @@ $VERSION = eval $VERSION;
 use Class::Std;
 use Params::Validate qw( :all );
 use Regexp::Common;
-
 use NetApp::Aggregate::Plex;
 use NetApp::Aggregate::RAIDGroup;
+
+#### This is to create an Filer Object######
+
 my $hotname='192.168.227.129';
 my ($filer) = NetApp::Filer -> new({
-hostname => $hotname,
-});
-print "SCRIPT NAME\n:";
-my $name=<STDIN>;
-chop($name);
-my @a=&c($name);
-print @a;
-sub c(){
-no warnings "all";
-my $r_s =12;
-my $d_c = 4;
-my $aggr=$filer->create_aggregate(
-name => $name,
-raidtype => 'raid4',
-disktype =>'FCAL',
-diskcount => $d_c,
-raidsize => $r_s,
-force => 1,
-#disks => [ 'v4.21','v4.20','v4.28','v4.33'],
-);
-print "the Create file is returning the filer boject $filer and AGGREGATE is created";
-return $filer;
-}
+                        hostname => $hotname,
+                  });
 
-__END__
-@a = $filer->get_aggregate_names;
-print @a;
-$n = "script";
-print ">>>$n<<<<\n";
+#### This is to create an Aggregate using Filer Object######
+
+print "Please Enter Aggregate Name\n:";
+my $aggr_name=<STDIN>;
+chop($aggr_name);
+
+#### make default RAID Size to 12#####
+my $raid_size =12;
+
+##### make default Disk Count to 4#####
+my $disk_count = 4;
+
+my $aggr=$filer->create_aggregate(
+                        name => $aggr_name,
+                        raidtype => 'raid4',
+                        disktype =>'FCAL',
+                        diskcount => $disk_count,
+                        raidsize => $raid_size,
+                        force => 1,
+                        #disks => [ 'v4.21','v4.20','v4.28','v4.33'],
+                    );
+
