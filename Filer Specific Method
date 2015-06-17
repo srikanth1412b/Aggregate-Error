@@ -1,0 +1,78 @@
+Filer Specific Methods
+
+new( $args_ref )
+
+This method takes a hash reference of arguments, and returns a NetApp::Filer object to be
+used to communicate with the specified filer.
+The arguments are as follows:
+
+NetApp::Filer‐>new({
+# Required arguments
+hostname => $hostname,
+# Optional arguments
+username => $username,
+ssh_identify => $ssh_identity,
+ssh_command => [ @ssh_command ],
+protocol => 'ssh' | 'telnet',
+telnet_password => $telnet_password,
+telnet_timeout => $telnet_timeout,
+cache_enabled => 0 || 1,
+cache_expiration => $cache_expiration,
+});
+
+(required) hostname
+The value of this argument is a string, which is the hostname of the filer to connect to.
+
+(optional) username
+The username to use for communication. Defaults to 'root'.
+
+(optional) ssh_identify
+The ssh identify file to use for ssh communication. If not specified then ssh will be invoked
+without the i argument, and will use whatever default identify file is setup for the current
+user.
+In practice, this argument will almost always be required, but the code allows it to be
+optional.If the specified file doesn't exist, then a fatal exception is raised.
+
+(optional) ssh_command
+An array reference representing the ssh command to be used to communication. Defaults
+to just ['ssh'].
+Don't use this argument to specify the identity via i.
+Instead, use the ssh_identify
+argument. If you need to specify certain ssh options, for example StrictHostKeyChecking,
+then use this argument. For example:
+
+my $filer = NetApp::Filer‐>new({
+hostname => $somenasfiler,
+ssh_command => [qw( ssh ‐o StrictHostKeyChecking=no )],
+});
+
+(optional) protocol
+This option is a string, either 'ssh' or 'telnet'. The default, and recommended, protocol is
+ssh. While telnet is supported, only one concurrent root telnet session per filer is allowed,
+and the error checking over telnet is far less robust than ssh.
+
+(optional) telnet_password
+This option is a string, and specified the root password to use when connecting via telnet.
+Note that password based ssh connectivity is not supported, and telnet access, while
+supported, is not recommended. The author uses the telnet support for only one thing:
+installing the ssh keys, and configuring ssh access.
+
+(optional) cache_enabled
+NOTE: The caching mechanism is considered experimental. For one thing, it depends on
+using a patched version of Memoize::Expire, which is still not yet available on CPAN. Use
+with caution.
+This option has a boolean value, and is used to disable the internal caching of the results
+of several API calls. By default, the cache is disabled. If enabled, then the result of any of
+the following NetApp::Filer methods will be cached, using Memoize:
+
+get_aggregate
+get_volume
+get_qtree
+
+To enable caching of these API calls, set cache_enabled to a true value. The cached
+values will expire (see the next option), unless the expiration value is set to 0.
+
+(optional) cache_expiration
+This option is an integer, and is the number of seconds to cache results of the above API
+calls. The default value is 10 seconds. Setting this value to 0 will prevent the cached
+values from expiring at all.
